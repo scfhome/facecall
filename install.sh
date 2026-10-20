@@ -151,7 +151,13 @@ if [ "$INSTALL_TARGET" = "hermes" ] || [ "$INSTALL_TARGET" = "both" ]; then
 
     # 复制必要文件
     cp SKILL.md "$HERMES_SKILLS_DIR/attend/"
-    cp hermes_integration/skills/attend/executor.py "$HERMES_SKILLS_DIR/attend/"
+    
+    # 修正 executor.py 的 shebang 为 Hermes venv Python
+    sed "1s|^#!/usr/bin/env python3|#!$HERMES_PYTHON|" \
+        hermes_integration/skills/attend/executor.py \
+        > "$HERMES_SKILLS_DIR/attend/executor.py"
+    chmod +x "$HERMES_SKILLS_DIR/attend/executor.py"
+    
     cp hermes_integration/skills/attend/config.yaml "$HERMES_SKILLS_DIR/attend/"
 
     success "Hermes Skill 安装完成"
