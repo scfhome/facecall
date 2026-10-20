@@ -168,12 +168,19 @@ def validate_params(kwargs: dict[str, Any]) -> dict[str, Any]:
         }
 
     # 提取其他参数
+    # submit: 兼容字符串和布尔值
+    submit_value = kwargs.get("submit", "false")
+    if isinstance(submit_value, bool):
+        submit = submit_value
+    else:
+        submit = str(submit_value).lower() in ["true", "yes", "1"]
+    
     params = {
         "photo": str(photo_path.absolute()),
         "course": course,
         "date": kwargs.get("date", "today"),
         "threshold": float(kwargs.get("threshold", 0.70)),
-        "submit": kwargs.get("submit", "false").lower() in ["true", "yes", "1"],
+        "submit": submit,
         "database": kwargs.get("database"),
         "roster": kwargs.get("roster")
     }
