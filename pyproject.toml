@@ -1,0 +1,184 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "facecall"
+version = "1.0.0"
+description = "Smart attendance system with face recognition and Hermes Agent integration"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "scfmac", email = "scfmac@example.com"}
+]
+keywords = [
+    "face-recognition",
+    "attendance",
+    "deepface",
+    "hermes",
+    "education",
+    "ai-agent"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Education",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Education",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Image Recognition"
+]
+
+dependencies = [
+    "deepface==0.0.87",
+    "opencv-python==4.9.0.80",
+    "tensorflow==2.15.0",
+    "pillow==10.2.0",
+    "retina-face==0.0.13",
+    "requests==2.31.0",
+    "pycryptodome==3.20.0",
+    "beautifulsoup4==4.12.3",
+    "lxml==5.1.0",
+    "pandas==2.2.0",
+    "openpyxl==3.1.2",
+    "numpy==1.26.3",
+    "pyyaml==6.0.1",
+    "python-dotenv==1.0.1",
+    "pydantic==2.6.1",
+    "rich==13.7.0",
+    "click==8.1.7"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.12.0",
+    "black>=24.0.0",
+    "isort>=5.13.0",
+    "ruff>=0.2.0",
+    "mypy>=1.8.0",
+    "ipdb>=0.13.13",
+    "ipython>=8.20.0"
+]
+
+docs = [
+    "sphinx>=7.2.0",
+    "sphinx-rtd-theme>=2.0.0"
+]
+
+[project.urls]
+Homepage = "https://github.com/scfhome/facecall"
+Documentation = "https://github.com/scfhome/facecall/blob/main/docs/INDEX.md"
+Repository = "https://github.com/scfhome/facecall"
+Issues = "https://github.com/scfhome/facecall/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.black]
+line-length = 100
+target-version = ['py310', 'py311', 'py312']
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.venv
+  | venv
+  | build
+  | dist
+  | \.eggs
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 100
+skip_gitignore = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+]
+ignore = [
+    "E501",  # line too long (handled by black)
+    "B008",  # do not perform function calls in argument defaults
+    "C901",  # too complex
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]  # unused imports in __init__.py
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+check_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = [
+    "deepface.*",
+    "cv2.*",
+    "tensorflow.*"
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "-v",
+    "--strict-markers",
+    "--cov=src/facecall",
+    "--cov-report=term-missing",
+    "--cov-report=html"
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests"
+]
+
+[tool.coverage.run]
+source = ["src/facecall"]
+omit = [
+    "*/tests/*",
+    "*/test_*.py",
+    "*/__pycache__/*"
+]
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if TYPE_CHECKING:",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:"
+]
