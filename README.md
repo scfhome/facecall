@@ -33,6 +33,7 @@ facecall class.jpg 体育3
 - 📸 自然语言：`识别 @photo.jpg 体育3`
 - 🧠 智能推理：自动查找数据库和名单
 - ✅ 交互确认：不确定项智能提示
+- 🔌 **Hermes Agent 集成** - Telegram Bot/定时任务/语音控制
 
 ### 🛡️ 隐私优先
 - 🔒 **本地处理** - 人脸数据不离开本地
@@ -138,7 +139,35 @@ python scripts/attend.py --photo class.jpg --course "体育3" --no-review
 
 ---
 
-## 🤖 Claude Code Skill 集成
+## 🤖 AI Agent 集成
+
+### Hermes Agent
+
+通过插件式架构，轻松集成到 Hermes AI Agent：
+
+```bash
+# Telegram Bot
+/attend @photo.jpg course=体育3
+
+# 一键完成（识别+提交）
+/attend @photo.jpg course=体育3 submit=true
+
+# 定时自动点名
+/cron add "0 8 * * 1,3,5" "/attend @/camera/latest.jpg course=体育3 submit=true"
+```
+
+**特性**：
+- ✅ 插件式架构（FaceCall + Rollcall Plugin）
+- ✅ 自然语言交互
+- ✅ Telegram/Discord/Slack 支持
+- ✅ 定时任务集成
+- ✅ 可选自动提交
+
+> 📖 详见 [Hermes 集成指南](hermes_integration/QUICKSTART.md)
+
+---
+
+### Claude Code Skill
 
 ```bash
 # 自然语言交互

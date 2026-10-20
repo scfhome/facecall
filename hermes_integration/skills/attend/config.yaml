@@ -1,0 +1,82 @@
+# 点到 FaceCall - Hermes 集成配置
+
+plugins:
+  # 教务系统提交插件
+  rollcall:
+    enabled: true
+    module_path: "hermes_integration.plugins.rollcall"
+
+    # rollcall CLI 路径
+    rollcall_cli_path: "../cucn-rollcall-cli/rollcall_auto.py"
+
+    # 超时设置（秒）
+    timeout: 60
+
+    # 凭证（可选，也可以从环境变量读取）
+    # username: ""
+    # password: ""
+
+    # 自动提交策略
+    auto_submit:
+      # 仅当以下条件都满足时才自动提交
+      conditions:
+        uncertain: 0        # 不确定人脸数 = 0
+        absent_max: 2       # 缺勤人数 <= 2
+
+      # 当以下条件满足时，提示人工确认
+      confirm_when:
+        - uncertain > 0     # 有不确定人脸
+        - absent > 5        # 缺勤超过5人
+
+# FaceCall 核心配置
+facecall:
+  # 默认人脸数据库路径（可被 Skill 参数覆盖）
+  default_database: "databases/default.pkl"
+
+  # 默认班级名单路径
+  default_roster: "rosters/default.xlsx"
+
+  # 默认识别阈值
+  default_threshold: 0.70
+
+  # 输出目录
+  output_dir: "outputs"
+
+  # 临时文件目录
+  temp_dir: "/tmp/facecall"
+
+# Hermes 集成配置
+hermes:
+  # 是否启用详细日志
+  verbose: true
+
+  # 结果格式
+  result_format: "markdown"  # json | markdown | text
+
+  # 是否在结果中包含标注图片
+  include_annotated_image: true
+
+  # 是否保存中间结果
+  save_intermediate: true
+
+  # 自然语言触发词
+  triggers:
+    - "识别考勤"
+    - "点名"
+    - "点到"
+    - "attend"
+    - "check attendance"
+
+# 通知配置
+notifications:
+  # 识别完成后是否通知
+  on_recognition_complete: true
+
+  # 提交完成后是否通知
+  on_submission_complete: true
+
+  # 有不确定人脸时是否立即通知
+  on_uncertain_faces: true
+
+  # 缺勤人数超过阈值时通知
+  on_absence_threshold: 5
