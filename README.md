@@ -1,290 +1,402 @@
-# 🎓 点到 FaceCall
+# 🎯 FaceCall
 
-**智能课堂考勤系统** - 一拍即点，秒知到课
+**智能人脸识别考勤系统 + 多 AI Agent 集成**
 
-> 深度融合人脸识别与教务系统提交的一体化解决方案
+一键安装的 Skill，支持 Hermes、WorkBuddy 等 AI Agent 系统。
 
-[![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 ---
 
 ## ✨ 核心特性
 
-### 🎯 一键完成
-```bash
-# 原有方案：两条命令
-python face-cli/check_attendance.py ...  # 步骤1
-python zfsoft-cli/rollcall_auto.py ...   # 步骤2
-
-# 新方案：一条命令
-facecall check --photo class.jpg --course "体育3"
-# 或更简洁
-facecall class.jpg 体育3
-```
-
-### 🚀 极致效率
-- ⚡ **15-20秒** - 从拍照到提交完成
-- 🎯 **95%+准确率** - RetinaFace + Facenet512
-- 🔄 **零中间文件** - 内存数据流，无残留
-
-### 🤖 AI 深度集成
-- 📸 自然语言：`识别 @photo.jpg 体育3`
-- 🧠 智能推理：自动查找数据库和名单
-- ✅ 交互确认：不确定项智能提示
-- 🔌 **Hermes Agent 集成** - Telegram Bot/定时任务/语音控制
-
-### 🛡️ 隐私优先
-- 🔒 **本地处理** - 人脸数据不离开本地
-- 📊 **最小传输** - 仅提交学号和状态
-- 🔐 **加密存储** - 数据库可选加密
-
----
-
-## 📊 架构对比
-
-### 原有方案
-```
-classroom-face-attendance  +  zfsoft-rollcall-cli
-         ↓                          ↓
-    JSON文件中转
-         ↓
-    需要两条命令
-```
-
-### 新方案
-```
-点到 FaceCall (统一项目)
-    ↓
-人脸识别模块 → 内存数据流 → 教务提交模块
-    ↓
-一条命令完成
-```
+- 🎭 **人脸识别考勤** - DeepFace + RetinaFace + Facenet512
+- 🔌 **插件式架构** - 动态加载，易于扩展
+- 🤖 **多 Agent 集成** - 支持 Hermes、WorkBuddy 等
+- ⚡ **一键安装** - 3 分钟部署，开箱即用
+- 🛡️ **隐私优先** - 本地处理，仅传输学号
+- 📱 **多平台支持** - Telegram Bot / CLI / 定时任务
 
 ---
 
 ## 🚀 快速开始
 
-### 安装
+### Hermes Agent 用户
 
 ```bash
-# 1. 克隆仓库
-git clone https://github.com/YOU/facecall-system.git
-cd facecall-system
+# 1. 克隆项目
+git clone https://github.com/scfhome/facecall.git
+cd facecall
 
-# 2. 创建虚拟环境
-python3 -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+# 2. 一键安装
+bash skills/hermes/attend/install.sh
 
-# 3. 安装依赖
-pip install -r requirements.txt
+# 3. 配置数据
+vim config/config.yaml
+# 填写教务系统账号、课程信息
 
-# 4. 配置
-cp .env.example .env
-# 编辑 .env，填入教务系统账号密码
+# 4. 准备人脸数据库
+mkdir -p faces
+# 将学生照片放入 faces/ 目录（以学号命名，如 20210001.jpg）
+
+# 5. 立即使用
+/attend @photo.jpg course=体育3
 ```
 
-### 一次性准备（建立人脸库）
+**详细说明**: [skills/hermes/attend/README.md](skills/hermes/attend/README.md)
+
+### WorkBuddy Agent 用户
 
 ```bash
-# 方案A: 单人照建库
-python scripts/build_db.py \
-  --mode single \
-  --photos photos/001班/ \
-  --roster rosters/001班.xlsx \
-  --output databases/体育3_001班.pkl
+# 1. 克隆项目
+git clone https://github.com/scfhome/facecall.git
+cd facecall
 
-# 方案B: 合照建库
-python scripts/build_db.py \
-  --mode group \
-  --photo class_photo.jpg \
-  --roster rosters/001班.xlsx \
-  --output databases/体育3_001班.pkl
+# 2. 一键安装
+bash skills/workbuddy/facecall/install.sh
+
+# 3. WorkBuddy 自动发现工具
+# 立即可用
 ```
 
-### 日常使用（一键考勤）
+**详细说明**: [skills/workbuddy/facecall/README.md](skills/workbuddy/facecall/README.md)
+
+### 直接使用核心库
 
 ```bash
-# 最简用法（自动从配置查找数据库和名单）
-python scripts/attend.py --photo class.jpg --course "体育3"
+# 安装
+pip install -e .
 
-# 完整用法
-python scripts/attend.py \
-  --photo class.jpg \
-  --course "体育3" \
-  --date today \
-  --threshold 0.70
+# Python 调用
+from facecall import FaceRecognizer, PluginManager
 
-# 仅识别，不提交
-python scripts/attend.py --photo class.jpg --course "体育3" --no-submit
-
-# 跳过人工审核（全自动）
-python scripts/attend.py --photo class.jpg --course "体育3" --no-review
-```
-
-**输出示例**:
-```
-✅ 考勤完成
-
-📊 统计:
-- 总人数: 37
-- 已提交: 35
-- 不确定: 2
-  - 20230015 张三 (相似度: 0.72)
-  - 20230028 李四 (相似度: 0.68)
-
-⏱️ 耗时: 18.3秒
+recognizer = FaceRecognizer()
+result = recognizer.recognize("photo.jpg", course="体育3")
 ```
 
 ---
 
-## 🤖 AI Agent 集成
+## 📖 使用场景
 
-### Hermes Agent
+### 场景 1: Telegram Bot 日常点名
 
-通过插件式架构，轻松集成到 Hermes AI Agent：
+```
+老师: [上传班级合照]
+老师: /attend 体育3
+
+Bot: ✅ 识别完成！
+     📊 到课: 35/37人
+     ✓ 正常: 35人
+     ⚠️ 缺勤: 2人
+     
+     详细名单:
+     [显示学生列表]
+```
+
+### 场景 2: 一键识别 + 自动提交
 
 ```bash
-# Telegram Bot
-/attend @photo.jpg course=体育3
-
-# 一键完成（识别+提交）
 /attend @photo.jpg course=体育3 submit=true
 
-# 定时自动点名
+# 自动完成:
+# 1. 人脸识别
+# 2. 提交到教务系统
+# 3. 返回结果
+```
+
+### 场景 3: 定时自动点名
+
+```bash
+# 每周一、三、五早上 8:00 自动点名
 /cron add "0 8 * * 1,3,5" "/attend @/camera/latest.jpg course=体育3 submit=true"
 ```
 
-**特性**：
-- ✅ 插件式架构（FaceCall + Rollcall Plugin）
-- ✅ 自然语言交互
-- ✅ Telegram/Discord/Slack 支持
-- ✅ 定时任务集成
-- ✅ 可选自动提交
+### 场景 4: 不确定项审核
 
-> 📖 详见 [Hermes 集成指南](hermes_integration/QUICKSTART.md)
+```
+识别结果:
+✅ 35人确定到课
+⚠️  2人不确定 (相似度低)
+
+请审核: [显示不确定人脸]
+老师: 确认/修正
+
+系统: 已更新，是否提交？
+老师: 提交
+系统: ✅ 提交成功
+```
 
 ---
 
-### Claude Code Skill
+## 🏗️ 架构设计
+
+### 分层架构
+
+```
+┌─────────────────────────────────────────┐
+│  Agent 生态层                            │
+│  Hermes | WorkBuddy | AutoGPT | ...    │  ← 易于扩展
+└────────────────┬────────────────────────┘
+                 │
+┌────────────────▼────────────────────────┐
+│  适配层（薄包装）                         │
+│  executor.py | tool.py                  │  ← <100 行
+└────────────────┬────────────────────────┘
+                 │
+┌────────────────▼────────────────────────┐
+│  核心业务层                              │
+│  FaceRecognizer | PluginManager         │  ← 单点维护
+└────────────────┬────────────────────────┘
+                 │
+┌────────────────▼────────────────────────┐
+│  基础设施层                              │
+│  DeepFace | TensorFlow | OpenCV        │
+└─────────────────────────────────────────┘
+```
+
+**设计原则**:
+- ✅ 核心库独立，不依赖任何 Agent
+- ✅ 适配层极薄，易于维护
+- ✅ 插件式扩展，动态加载
+- ✅ 符合 SOLID 原则
+
+详细架构: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+
+---
+
+## 📁 项目结构
+
+```
+facecall/
+├── README.md                    # 本文档
+├── LICENSE                      # MIT 许可证
+├── CHANGELOG.md                 # 版本历史
+├── CONTRIBUTING.md              # 贡献指南
+│
+├── src/facecall/               # 核心库
+│   ├── core/                   # 核心模块
+│   │   ├── plugin.py           # 插件协议
+│   │   ├── plugin_manager.py  # 插件管理器
+│   │   └── workflow.py         # 工作流
+│   ├── face/                   # 人脸识别
+│   ├── rollcall/               # 考勤提交
+│   └── config/                 # 配置管理
+│
+├── skills/                     # Agent 适配器 ⭐
+│   ├── hermes/attend/          # Hermes Skill
+│   │   ├── install.sh          # 一键安装
+│   │   ├── requirements.txt
+│   │   └── README.md
+│   └── workbuddy/facecall/     # WorkBuddy Tool
+│       ├── install.sh
+│       ├── tool.py
+│       └── README.md
+│
+├── hermes_integration/         # Hermes 原生集成
+│   ├── skills/attend/
+│   │   ├── executor.py         # Skill 执行器
+│   │   ├── config.yaml         # 配置文件
+│   │   └── SKILL.md            # 使用手册
+│   └── plugins/rollcall/
+│       └── plugin.py           # Plugin 实现
+│
+├── docs/                       # 文档
+│   ├── ARCHITECTURE.md         # 架构设计
+│   └── PLUGIN_DEVELOPMENT.md   # 插件开发
+│
+├── tests/                      # 测试
+├── config/                     # 配置模板
+│   ├── config.yaml
+│   └── classes.yaml
+│
+├── requirements.txt            # 生产依赖
+├── requirements-dev.txt        # 开发依赖
+└── pyproject.toml              # 项目配置
+```
+
+---
+
+## 🔧 开发指南
+
+### 环境要求
+
+- Python 3.10+
+- TensorFlow 2.15.0
+- OpenCV 4.9.0
+- 8GB+ RAM (人脸识别模型)
+
+### 安装开发环境
 
 ```bash
-# 自然语言交互
-"识别 @class_photo.jpg 体育3"
-"考勤 @photo.jpg 高等数学"
-"点名 @today_class.jpg 体育3 --no-review"
+# 克隆项目
+git clone https://github.com/scfhome/facecall.git
+cd facecall
+
+# 创建虚拟环境
+python3 -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+
+# 安装依赖
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
+
+# 安装为可编辑模式
+pip install -e .
 ```
 
-Claude 会自动：
-1. 从文件名提取课程和日期
-2. 从配置查找数据库和名单
-3. 执行识别和提交
-4. 格式化输出结果
-5. 不确定项交互确认
-
----
-
-## 📚 文档
-
-- [快速开始](docs/QUICKSTART.md) - 5分钟上手
-- [架构设计](PROJECT_DESIGN.md) - 技术细节
-- [用户指南](docs/USER_GUIDE.md) - 完整功能
-- [部署指南](docs/DEPLOYMENT.md) - 生产环境
-- [故障排查](docs/TROUBLESHOOTING.md)
-
----
-
-## 🔄 从原项目迁移
-
-如果你之前使用 `classroom-face-attendance` + `zfsoft-rollcall-cli`：
+### 运行测试
 
 ```bash
-# 1. 复制人脸数据库
-cp /path/to/classroom-face-attendance/databases/*.pkl databases/
+# 运行所有测试
+pytest tests/ -v
 
-# 2. 复制名单
-cp /path/to/classroom-face-attendance/rosters/*.xlsx rosters/
+# 测试覆盖率
+pytest --cov=src/facecall tests/
 
-# 3. 配置 classes.yaml
-vim config/classes.yaml
+# 代码格式化
+black src/ tests/
+isort src/ tests/
 
-# 4. 完成！使用新命令
-python scripts/attend.py --photo class.jpg --course "体育3"
+# 代码检查
+ruff check src/ tests/
+mypy src/
+```
+
+### 开发新插件
+
+参考 [docs/PLUGIN_DEVELOPMENT.md](docs/PLUGIN_DEVELOPMENT.md)
+
+```python
+# 1. 实现插件协议
+class MyPlugin:
+    name = "my_plugin"
+    version = "1.0.0"
+    
+    def execute(self, data): ...
+    def validate(self, data): ...
+    def get_info(self): ...
+
+# 2. 注册到配置
+# config/config.yaml
+plugins:
+  my_plugin:
+    enabled: true
+    module_path: "path.to.plugin"
+
+# 3. 使用
+manager = PluginManager("config.yaml")
+result = manager.execute_plugin("my_plugin", data)
 ```
 
 ---
 
-## 🏗️ 项目结构
+## 📊 性能指标
 
-```
-facecall-system/
-├── src/facecall/
-│   ├── face/          # 人脸识别模块
-│   ├── rollcall/      # 教务系统模块
-│   ├── core/          # 核心业务逻辑
-│   ├── config/        # 配置管理
-│   └── utils/         # 工具模块
-├── scripts/           # 命令行脚本
-│   ├── attend.py      # 一键考勤（核心）
-│   ├── build_db.py    # 建立人脸库
-│   └── list_courses.py # 查询课程
-├── config/            # 配置文件
-│   ├── config.yaml    # 主配置
-│   └── classes.yaml   # 班级配置
-└── .claude/skills/    # Claude Code Skill
-```
+| 指标 | 数值 | 说明 |
+|------|------|------|
+| **识别速度** | ~8 秒 | 37 人班级，CPU |
+| **提交耗时** | ~5 秒 | 网络请求 |
+| **总耗时** | 15-20 秒 | 完整流程 |
+| **准确率** | 95%+ | 正常光照条件 |
+| **内存占用** | ~2GB | 模型加载后 |
+
+**优化潜力**:
+- GPU 加速: 3-5x 提升
+- 批量处理: 2-3x 提升
+- 模型量化: 1.5-2x 提升
 
 ---
 
-## 🎯 优势对比
+## 🔒 安全性
 
-| 维度 | 原方案 | 新方案 | 提升 |
-|------|--------|--------|------|
-| **命令数** | 2条 | 1条 | 简化50% |
-| **中间文件** | JSON文件 | 内存传递 | 无残留 |
-| **配置文件** | 2份 | 1份 | 统一管理 |
-| **依赖管理** | 独立venv | 统一依赖 | 无冲突 |
-| **学习成本** | 两个工具 | 一个工具 | 降低50% |
-| **AI集成** | 分别调用 | 一次调用 | 更友好 |
+### 隐私保护
 
----
+- ✅ 人脸数据本地处理
+- ✅ 仅传输学号（不传图片）
+- ✅ 配置文件可加密
+- ✅ 支持环境变量存储密码
 
-## 📦 技术栈
+### 输入验证
 
-- **人脸识别**: DeepFace (Facenet512 + RetinaFace)
-- **图像处理**: OpenCV + Pillow
-- **深度学习**: TensorFlow 2.15
-- **数据处理**: Pandas + NumPy
-- **网络请求**: Requests + BeautifulSoup
-- **配置管理**: PyYAML + Pydantic
-- **终端UI**: Rich + Click
+- ✅ Plugin Protocol 强制 validate()
+- ✅ Pydantic 数据验证
+- ✅ 异常捕获和处理
+
+### 依赖管理
+
+- ✅ 版本固定（requirements.txt）
+- ✅ 定期更新（安全补丁）
+- ⚠️ 建议添加 `safety` 扫描
 
 ---
 
 ## 🤝 贡献
 
-欢迎贡献！请查看 [CONTRIBUTING.md](CONTRIBUTING.md)
+欢迎贡献代码、文档、问题反馈！
+
+1. Fork 项目
+2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交更改 (`git commit -m 'feat: add AmazingFeature'`)
+4. 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 创建 Pull Request
+
+详见 [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ---
 
-## 📄 许可证
+## 📜 开源协议
 
-[MIT License](LICENSE)
-
----
-
-## 🔗 相关项目
-
-- [classroom-face-attendance](https://github.com/sucanfeng-coder/classroom-face-attendance) - 原人脸识别项目
-- [zfsoft-rollcall-cli](https://github.com/YOU/zfsoft-rollcall-cli) - 原教务系统项目
+本项目采用 [MIT License](LICENSE) 开源。
 
 ---
 
-## 📧 联系
+## 🙏 致谢
 
-有问题或建议？请提 [Issue](https://github.com/YOU/facecall-system/issues)
+### 核心技术
+
+- [DeepFace](https://github.com/serengil/deepface) - 人脸识别框架
+- [TensorFlow](https://www.tensorflow.org/) - 深度学习框架
+- [OpenCV](https://opencv.org/) - 计算机视觉库
+
+### 灵感来源
+
+感谢所有为开源社区做出贡献的开发者！
 
 ---
 
-**⭐ 如果这个项目对你有帮助，请给个 Star！**
+## 📞 联系方式
+
+- **项目主页**: https://github.com/scfhome/facecall
+- **问题反馈**: [GitHub Issues](https://github.com/scfhome/facecall/issues)
+- **维护者**: scfmac
+
+---
+
+## 📈 版本历史
+
+查看 [CHANGELOG.md](CHANGELOG.md) 了解版本更新历史。
+
+**当前版本**: v1.0.0
+
+---
+
+## 🎓 相关资源
+
+### 文档
+- [架构设计](docs/ARCHITECTURE.md)
+- [插件开发](docs/PLUGIN_DEVELOPMENT.md)
+- [Skill 使用手册](hermes_integration/skills/attend/SKILL.md)
+
+### 安装指南
+- [Hermes 安装](skills/hermes/attend/README.md)
+- [WorkBuddy 安装](skills/workbuddy/facecall/README.md)
+
+### 示例
+- [配置示例](config/)
+- [测试示例](tests/)
+
+---
+
+**FaceCall - 让 AI Agent 帮你点名！** 🎉

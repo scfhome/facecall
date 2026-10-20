@@ -193,31 +193,120 @@ def run_facecall_check(params: dict[str, Any]) -> dict[str, Any]:
     Returns:
         dict: 识别结果
     """
-    # TODO: 这里暂时用 subprocess 调用，等 FaceCall CLI 实现后替换
-    # 现在先返回模拟数据
+    import subprocess
+    import json
+    from pathlib import Path
 
-    logger.info(f"模拟人脸识别: photo={params['photo']}, course={params['course']}")
+    # 读取配置获取项目根目录
+    config_path = Path(__file__).parent / "config.yaml"
+    if not config_path.exists():
+        return {
+            "success": False,
+            "error": "配置文件不存在"
+        }
 
-    # 模拟识别结果
-    return {
-        "success": True,
-        "date": params["date"],
-        "course": params["course"],
-        "summary": {
-            "total": 37,
-            "present": 35,
-            "absent": 2,
-            "uncertain": 0
-        },
-        "students": [
-            {"xh": "20230001", "category": "正常", "confidence": 0.95},
-            {"xh": "20230002", "category": "正常", "confidence": 0.92},
-            # ... 其他学生
-            {"xh": "20230036", "category": "旷课", "note": "未检测到"},
-            {"xh": "20230037", "category": "旷课", "note": "未检测到"}
-        ],
-        "annotated_image": "/tmp/annotated.jpg"
-    }
+    import yaml
+    with open(config_path) as f:
+        config = yaml.safe_load(f)
+
+    project_root = Path(config["facecall"]["project_root"])
+    check_script = project_root / "classroom-face-attendance/scripts/check_attendance.py"
+
+    if not check_script.exists():
+        return {
+            "success": False,
+            "error": f"人脸识别脚本不存在: {check_script}"
+        }
+
+    # 解析 database 和 roster 路径
+    database = params.get("database")
+    if not database:
+        database = project_root / config["facecall"]["default_database"]
+    else:
+        database = Path(database)
+
+    roster = params.get("roster")
+    if not roster:
+        roster = project_root / config["facecall"]["default_roster"]
+    else:
+        roster = Path(roster)
+
+    # 检查文件存在性
+    if not database.exists():
+        return {
+            "success": False,
+            "error": f"人脸数据库不存在: {database}"
+        }
+
+    if not roster.exists():
+        return {
+            "success": False,
+            "error": f"班级名单不存在: {roster}"
+        }
+
+    # 准备输出路径
+    output_json = Path("/tmp") / f"attendance_{params['course']}_{params['date']}.json"
+    annotated_img = Path("/tmp") / f"annotated_{params['course']}_{params['date']}.jpg"
+
+    # 构建命令
+    cmd = [
+        "python3",
+        str(check_script),
+        "--photo", params["photo"],
+        "--database", str(database),
+        "--roster", str(roster),
+        "--threshold", str(params["threshold"]),
+        "--output", str(output_json),
+        "--annotated", str(annotated_img)
+    ]
+
+    logger.info(f"执行人脸识别: {' '.join(cmd)}")
+
+    try:
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=120
+        )
+
+        if result.returncode != 0:
+            logger.error(f"识别失败: {result.stderr}")
+            return {
+                "success": False,
+                "error": result.stderr
+            }
+
+        # 读取结果
+        if not output_json.exists():
+            return {
+                "success": False,
+                "error": "识别脚本未生成输出文件"
+            }
+
+        with open(output_json) as f:
+            attendance_data = json.load(f)
+
+        return {
+            "success": True,
+            "date": params["date"],
+            "course": params["course"],
+            "summary": attendance_data.get("summary", {}),
+            "students": attendance_data.get("students", []),
+            "annotated_image": str(annotated_img) if annotated_img.exists() else None
+        }
+
+    except subprocess.TimeoutExpired:
+        return {
+            "success": False,
+            "error": "识别超时（120秒）"
+        }
+    except Exception as e:
+        logger.exception("识别过程出错")
+        return {
+            "success": False,
+            "error": str(e)
+        }
 
 
 def submit_via_plugin(

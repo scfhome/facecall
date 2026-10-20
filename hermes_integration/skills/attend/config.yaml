@@ -7,7 +7,7 @@ plugins:
     module_path: "hermes_integration.plugins.rollcall"
 
     # rollcall CLI 路径
-    rollcall_cli_path: "../cucn-rollcall-cli/rollcall_auto.py"
+    rollcall_cli_path: "/Users/scfmac/Documents/教学大纲/学校网站分析/cucn-rollcall-cli/rollcall_auto.py"
 
     # 超时设置（秒）
     timeout: 60
@@ -30,11 +30,14 @@ plugins:
 
 # FaceCall 核心配置
 facecall:
+  # 项目根目录
+  project_root: "/Users/scfmac/Documents/教学大纲/学校网站分析"
+  
   # 默认人脸数据库路径（可被 Skill 参数覆盖）
-  default_database: "databases/default.pkl"
+  default_database: "classroom-face-attendance/databases/default.pkl"
 
   # 默认班级名单路径
-  default_roster: "rosters/default.xlsx"
+  default_roster: "classroom-face-attendance/rosters/default.xlsx"
 
   # 默认识别阈值
   default_threshold: 0.70
