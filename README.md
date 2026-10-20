@@ -1,6 +1,8 @@
-# 🎯 Smart Attendance System
+# 🎓 点到 FaceCall
 
-**智能考勤系统** - 人脸识别 + 教务系统自动提交的一体化解决方案
+**智能课堂考勤系统** - 一拍即点，秒知到课
+
+> 深度融合人脸识别与教务系统提交的一体化解决方案
 
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -17,7 +19,9 @@ python face-cli/check_attendance.py ...  # 步骤1
 python zfsoft-cli/rollcall_auto.py ...   # 步骤2
 
 # 新方案：一条命令
-python scripts/attend.py --photo class.jpg --course "体育3"
+facecall check --photo class.jpg --course "体育3"
+# 或更简洁
+facecall class.jpg 体育3
 ```
 
 ### 🚀 极致效率
@@ -50,7 +54,7 @@ classroom-face-attendance  +  zfsoft-rollcall-cli
 
 ### 新方案
 ```
-Smart Attendance System (统一项目)
+点到 FaceCall (统一项目)
     ↓
 人脸识别模块 → 内存数据流 → 教务提交模块
     ↓
@@ -65,8 +69,8 @@ Smart Attendance System (统一项目)
 
 ```bash
 # 1. 克隆仓库
-git clone https://github.com/YOU/smart-attendance-system.git
-cd smart-attendance-system
+git clone https://github.com/YOU/facecall-system.git
+cd facecall-system
 
 # 2. 创建虚拟环境
 python3 -m venv venv
@@ -185,8 +189,8 @@ python scripts/attend.py --photo class.jpg --course "体育3"
 ## 🏗️ 项目结构
 
 ```
-smart-attendance-system/
-├── src/smart_attendance/
+facecall-system/
+├── src/facecall/
 │   ├── face/          # 人脸识别模块
 │   ├── rollcall/      # 教务系统模块
 │   ├── core/          # 核心业务逻辑
@@ -250,7 +254,7 @@ smart-attendance-system/
 
 ## 📧 联系
 
-有问题或建议？请提 [Issue](https://github.com/YOU/smart-attendance-system/issues)
+有问题或建议？请提 [Issue](https://github.com/YOU/facecall-system/issues)
 
 ---
 

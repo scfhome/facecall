@@ -4,7 +4,7 @@
 
 | 维度 | 方案1: 独立项目 | 方案2: 外挂集成 | 方案3: 深度融合 ✅ |
 |------|----------------|----------------|-------------------|
-| **项目** | face-attendance-cli<br>+ zfsoft-rollcall-cli | face-attendance-cli<br>+ scripts/integrate.py | **smart-attendance-system** |
+| **项目** | face-attendance-cli<br>+ zfsoft-rollcall-cli | face-attendance-cli<br>+ scripts/integrate.py | **facecall-system** |
 | **耦合度** | 松耦合（JSON文件） | 中耦合（Python调用） | 紧耦合（统一工作流） |
 | **数据流** | 文件 → JSON → 文件 | 内存 → 函数调用 | 内存 → 对象传递 |
 | **依赖管理** | 2个独立 venv | 2个独立 venv | 1个统一 venv |
@@ -69,8 +69,8 @@ face-attendance-cli/
 ### 方案3: 深度融合（推荐方案 ✅）
 
 ```
-smart-attendance-system/
-├── src/smart_attendance/
+facecall-system/
+├── src/facecall/
 │   ├── face/              ← 人脸识别模块
 │   ├── rollcall/          ← 教务系统模块
 │   └── core/workflow.py   ← 统一编排
@@ -142,7 +142,7 @@ python scripts/integrate_zfsoft.py \
 
 ```bash
 # 最简命令（自动查找配置）
-cd ~/smart-attendance-system
+cd ~/facecall-system
 source venv/bin/activate
 attend class.jpg --course "体育3"
 
@@ -229,7 +229,7 @@ zfsoft-rollcall-cli/.env
 
 **方案3** ✅:
 ```
-smart-attendance-system/config/
+facecall-system/config/
 ├── config.yaml        # 统一配置
 └── classes.yaml       # 班级配置
 
@@ -354,8 +354,8 @@ Image → Python 对象 → 提交
 
 ### 方案3 的可能性 ✅
 ```
-smart-attendance-system/
-├── src/smart_attendance/
+facecall-system/
+├── src/facecall/
 │   ├── face/              ✅ 已有
 │   ├── rollcall/          ✅ 已有
 │   ├── api/               → Web API
@@ -371,7 +371,7 @@ smart-attendance-system/
 
 **步骤**:
 1. 保留原项目（作为备份）
-2. 创建新项目（smart-attendance-system）
+2. 创建新项目（facecall-system）
 3. 迁移人脸识别模块
 4. 迁移教务系统模块
 5. 实现统一工作流
@@ -385,7 +385,7 @@ smart-attendance-system/
 
 ## 🎯 结论
 
-**推荐使用方案3: smart-attendance-system**
+**推荐使用方案3: facecall-system**
 
 - ✅ 最佳用户体验
 - ✅ 最易维护

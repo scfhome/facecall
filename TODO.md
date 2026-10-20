@@ -1,4 +1,4 @@
-# 📝 Smart Attendance System - 下一步实施计划
+# 📝 点到 FaceCall - 下一步实施计划
 
 ## ✅ 已完成（Phase 0: 项目框架）
 
@@ -13,7 +13,7 @@
 
 ## 🚧 待实施（Phase 1: 核心功能）
 
-### 1. 人脸识别模块 (src/smart_attendance/face/)
+### 1. 人脸识别模块 (src/facecall/face/)
 
 ```bash
 # 需要从 classroom-face-attendance 迁移的代码
@@ -30,7 +30,7 @@
 - [ ] 添加类型注解
 - [ ] 编写单元测试
 
-### 2. 教务系统模块 (src/smart_attendance/rollcall/)
+### 2. 教务系统模块 (src/facecall/rollcall/)
 
 ```bash
 # 需要从 zfsoft-rollcall-cli 迁移的代码
@@ -46,7 +46,7 @@
 - [ ] 添加类型注解
 - [ ] 编写单元测试
 
-### 3. 配置管理模块 (src/smart_attendance/config/)
+### 3. 配置管理模块 (src/facecall/config/)
 
 ```python
 # settings.py - 配置加载和验证
@@ -61,7 +61,7 @@
 - [ ] 实现 validator.py
 - [ ] 添加单元测试
 
-### 4. 工具模块 (src/smart_attendance/utils/)
+### 4. 工具模块 (src/facecall/utils/)
 
 ```python
 # logger.py - 统一日志
@@ -92,7 +92,7 @@
 ### 6. Claude Code Skill (.claude/skills/)
 
 ```markdown
-# smart-attendance.md - Skill 定义
+# facecall.md - Skill 定义
 ```
 
 **任务**:

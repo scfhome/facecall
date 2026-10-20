@@ -1,8 +1,8 @@
-# 🎯 Smart Attendance System - 项目设计文档
+# 🎯 点到 FaceCall - 项目设计文档
 
 ## 📋 项目概述
 
-**项目名称**: Smart Attendance System (智能考勤系统)
+**项目名称**: 点到 FaceCall (智能考勤系统)
 
 **核心理念**: 
 将 `classroom-face-attendance`（人脸识别）和 `zfsoft-rollcall-cli`（教务系统提交）**深度融合**为一个统一的智能考勤解决方案。
@@ -25,9 +25,9 @@
 ### 整体架构
 
 ```
-smart-attendance-system/
+facecall-system/
 │
-├─ src/smart_attendance/
+├─ src/facecall/
 │  ├─ __init__.py
 │  │
 │  ├─ face/                    # 人脸识别模块（来自 classroom-face-attendance）
@@ -80,7 +80,7 @@ smart-attendance-system/
 │  └─ DEPLOYMENT.md
 │
 ├─ .claude/skills/             # Claude Code Skill
-│  └─ smart-attendance.md
+│  └─ facecall.md
 │
 ├─ requirements.txt            # 统一依赖
 ├─ pyproject.toml
@@ -216,8 +216,8 @@ class AttendanceWorkflow:
 
 import sys
 from pathlib import Path
-from smart_attendance.core.workflow import AttendanceWorkflow, AttendanceConfig
-from smart_attendance.utils.logger import get_logger
+from facecall.core.workflow import AttendanceWorkflow, AttendanceConfig
+from facecall.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
@@ -279,13 +279,13 @@ def main():
 
 def _find_database(course: str) -> Path:
     """从配置文件自动查找数据库"""
-    from smart_attendance.config import load_config
+    from facecall.config import load_config
     config = load_config()
     return config.get_database_for_course(course)
 
 def _find_roster(course: str) -> Path:
     """从配置文件自动查找名单"""
-    from smart_attendance.config import load_config
+    from facecall.config import load_config
     config = load_config()
     return config.get_roster_for_course(course)
 
@@ -330,7 +330,7 @@ python scripts/attend.py --photo class.jpg --course "体育3"
 ### Claude Code Skill 集成
 
 ```markdown
-# .claude/skills/smart-attendance.md
+# .claude/skills/facecall.md
 
 ## 功能描述
 智能考勤系统，人脸识别+自动提交。
@@ -545,8 +545,8 @@ classes:
 ```bash
 # 1. 创建新项目
 cd /path/to
-git clone https://github.com/YOU/smart-attendance-system.git
-cd smart-attendance-system
+git clone https://github.com/YOU/facecall-system.git
+cd facecall-system
 
 # 2. 迁移人脸数据库
 cp /path/to/classroom-face-attendance/databases/*.pkl databases/
@@ -589,7 +589,7 @@ docs/
 
 ## 🎉 总结
 
-**Smart Attendance System** 是原有两个项目的**深度融合**，不仅仅是简单的调用关系，而是：
+**点到 FaceCall** 是原有两个项目的**深度融合**，不仅仅是简单的调用关系，而是：
 
 1. **统一架构** - 单一代码仓库，模块化设计
 2. **统一体验** - 一条命令完成所有操作

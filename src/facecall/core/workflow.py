@@ -1,5 +1,5 @@
 """
-统一工作流 - 考勤流程的核心编排
+点到 FaceCall - 核心工作流
 
 职责：
 1. 协调人脸识别模块和教务系统模块
@@ -82,8 +82,8 @@ class AttendanceWorkflow:
         self._start_time = None
 
         # 延迟导入，避免循环依赖
-        from smart_attendance.face import FaceRecognizer
-        from smart_attendance.rollcall import RollCallClient
+        from facecall.face import FaceRecognizer
+        from facecall.rollcall import RollCallClient
 
         # 初始化人脸识别器
         self.face_recognizer = FaceRecognizer(
