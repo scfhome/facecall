@@ -1,0 +1,34 @@
+# 班级配置文件
+
+classes:
+  # 001班配置
+  - class_id: "001"
+    class_name: "234拓展女-1"
+    roster: "rosters/001班.xlsx"  # 班级名单
+
+    courses:
+      - name: "体育3"
+        database: "databases/体育3_001班.pkl"
+
+      - name: "高等数学"
+        database: "databases/高数_001班.pkl"
+
+  # 002班配置
+  - class_id: "002"
+    class_name: "计算机2班"
+    roster: "rosters/002班.xlsx"
+
+    courses:
+      - name: "Python编程"
+        database: "databases/Python_002班.pkl"
+
+      - name: "数据结构"
+        database: "databases/数据结构_002班.pkl"
+
+# 配置说明:
+# - class_id: 班级编号（唯一标识）
+# - class_name: 班级名称（用于显示）
+# - roster: 班级名单路径（相对于项目根目录）
+# - courses: 该班级的课程列表
+#   - name: 课程名称（用于匹配）
+#   - database: 人脸数据库路径（相对于项目根目录）

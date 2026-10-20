@@ -1,0 +1,37 @@
+# Smart Attendance System - 智能考勤系统配置
+
+# 教务系统配置
+zfsoft:
+  base_url: "${ZFSOFT_BASE_URL}"  # 从环境变量读取
+  username: "${ZFSOFT_USERNAME}"
+  password: "${ZFSOFT_PASSWORD}"
+
+# 人脸识别配置
+face_recognition:
+  # 模型选择
+  model: "Facenet512"  # VGG-Face / Facenet512 / ArcFace
+  detector: "retinaface"  # opencv / ssd / mtcnn / retinaface
+
+  # 识别阈值
+  threshold: 0.70  # 主阈值（低于此值判定为不匹配）
+  uncertain_range: [0.70, 0.85]  # 不确定范围（需人工审核）
+
+  # 性能配置
+  use_gpu: true
+  batch_size: 16
+
+# 班级配置（引用独立文件）
+classes_config: "config/classes.yaml"
+
+# 日志配置
+logging:
+  level: "INFO"  # DEBUG / INFO / WARNING / ERROR
+  format: "rich"  # rich / simple / json
+  file: "logs/attendance.log"
+
+# 输出配置
+output:
+  save_annotated_image: true  # 是否保存标注图片
+  annotated_dir: "outputs/annotated"
+  save_json: false  # 是否自动保存JSON
+  json_dir: "outputs/json"

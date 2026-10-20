@@ -1,0 +1,69 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# 项目特定 - 敏感数据
+# ======================================
+
+# 班级名单（包含学生信息）
+rosters/*.xlsx
+rosters/*.xls
+rosters/*.csv
+!rosters/.gitkeep
+!rosters/README.md
+
+# 人脸数据库（敏感数据）
+databases/*.pkl
+databases/*.db
+!databases/.gitkeep
+!databases/README.md
+
+# 输出文件
+outputs/
+logs/
+
+# 环境变量
+.env
+
+# 临时文件
+*.tmp
+*.temp
+temp_*
