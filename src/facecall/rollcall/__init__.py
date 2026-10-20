@@ -1,8 +1,3 @@
-"""教务点名模块
+"""中国传媒大学南广学院教务系统 CLI 登录工具"""
 
-提供教务系统考勤提交功能
-"""
-
-from .models import Student, Course, RollCallCategory
-
-__all__ = ["Student", "Course", "RollCallCategory"]
+__version__ = "0.1.0"

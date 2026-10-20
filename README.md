@@ -1,8 +1,8 @@
 # 🎯 FaceCall
 
-**智能人脸识别考勤系统 + 多 AI Agent 集成**
+**智能人脸识别考勤 Skill**
 
-一键安装的 Skill，支持 Hermes、WorkBuddy 等 AI Agent 系统。
+一个独立的、完整的 Skill 包，适配 Hermes、WorkBuddy 等 AI Agent 系统。
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
@@ -13,67 +13,80 @@
 ## ✨ 核心特性
 
 - 🎭 **人脸识别考勤** - DeepFace + RetinaFace + Facenet512
-- 🔌 **插件式架构** - 动态加载，易于扩展
-- 🤖 **多 Agent 集成** - 支持 Hermes、WorkBuddy 等
-- ⚡ **一键安装** - 3 分钟部署，开箱即用
+- 🔌 **独立 Skill 包** - 一键安装到 Hermes/WorkBuddy
+- 🤖 **多 Agent 支持** - 自动适配不同 Agent 系统
+- ⚡ **开箱即用** - 克隆即可运行，无外部依赖
 - 🛡️ **隐私优先** - 本地处理，仅传输学号
-- 📱 **多平台支持** - Telegram Bot / CLI / 定时任务
+- 📦 **完全自包含** - 所有代码都在项目内
 
 ---
 
 ## 🚀 快速开始
 
-### Hermes Agent 用户
+### 一键安装（推荐）
 
 ```bash
-# 1. 克隆项目
+# 克隆项目
 git clone https://github.com/scfhome/facecall.git
 cd facecall
 
-# 2. 一键安装
-bash skills/hermes/attend/install.sh
+# 一键安装（自动检测 Hermes/WorkBuddy）
+bash install.sh
 
-# 3. 配置数据
-vim config/config.yaml
-# 填写教务系统账号、课程信息
-
-# 4. 准备人脸数据库
-mkdir -p faces
-# 将学生照片放入 faces/ 目录（以学号命名，如 20210001.jpg）
-
-# 5. 立即使用
-/attend @photo.jpg course=体育3
+# 安装完成！
 ```
 
-**详细说明**: [skills/hermes/attend/README.md](skills/hermes/attend/README.md)
+安装脚本会自动：
+- ✅ 安装 Python 依赖
+- ✅ 安装 FaceCall 核心库
+- ✅ 检测并安装到 Hermes/WorkBuddy（如果存在）
+- ✅ 复制配置文件
+
+### Hermes Agent 用户
+
+安装后立即可用：
+
+```bash
+# Telegram Bot
+/attend @photo.jpg course=体育3
+
+# 自动提交到教务系统
+/attend @photo.jpg course=体育3 submit=true
+```
+
+**详细说明**: [hermes_integration/skills/attend/SKILL.md](hermes_integration/skills/attend/SKILL.md)
 
 ### WorkBuddy Agent 用户
 
-```bash
-# 1. 克隆项目
-git clone https://github.com/scfhome/facecall.git
-cd facecall
+安装后自动发现：
 
-# 2. 一键安装
-bash skills/workbuddy/facecall/install.sh
-
-# 3. WorkBuddy 自动发现工具
-# 立即可用
+```python
+# WorkBuddy 自动发现 facecall 工具
+agent.use_tool(
+    "facecall",
+    photo="photo.jpg",
+    course="体育3",
+    submit=True
+)
 ```
 
-**详细说明**: [skills/workbuddy/facecall/README.md](skills/workbuddy/facecall/README.md)
-
-### 直接使用核心库
+### 独立使用
 
 ```bash
-# 安装
+# 直接使用 tool.py
+python tool.py --photo photo.jpg --course "体育3" --submit
+
+# 或导入为 Python 包
 pip install -e .
+```
 
-# Python 调用
-from facecall import FaceRecognizer, PluginManager
+```python
+from facecall.face import FaceDetector, FaceMatcher
+from facecall.rollcall import AttendanceSubmitter
 
-recognizer = FaceRecognizer()
-result = recognizer.recognize("photo.jpg", course="体育3")
+detector = FaceDetector()
+faces = detector.detect_faces("photo.jpg")
+# ...
 ```
 
 ---
@@ -132,89 +145,87 @@ Bot: ✅ 识别完成！
 
 ## 🏗️ 架构设计
 
-### 分层架构
+### FaceCall 是一个完整的 Skill 包
 
 ```
 ┌─────────────────────────────────────────┐
-│  Agent 生态层                            │
-│  Hermes | WorkBuddy | AutoGPT | ...    │  ← 易于扩展
-└────────────────┬────────────────────────┘
-                 │
-┌────────────────▼────────────────────────┐
-│  适配层（薄包装）                         │
-│  executor.py | tool.py                  │  ← <100 行
-└────────────────┬────────────────────────┘
-                 │
-┌────────────────▼────────────────────────┐
-│  核心业务层                              │
-│  FaceRecognizer | PluginManager         │  ← 单点维护
-└────────────────┬────────────────────────┘
-                 │
-┌────────────────▼────────────────────────┐
-│  基础设施层                              │
-│  DeepFace | TensorFlow | OpenCV        │
+│  Agent Systems (Hermes/WorkBuddy/...)   │
+│                                         │
+│  ┌───────────────────────────────────┐ │
+│  │  FaceCall Skill                   │ │
+│  │  (独立、自包含)                   │ │
+│  │                                   │ │
+│  │  ┌─────────────────────────────┐ │ │
+│  │  │  入口层                     │ │ │
+│  │  │  executor.py / tool.py     │ │ │
+│  │  └─────────────────────────────┘ │ │
+│  │           ↓                       │ │
+│  │  ┌─────────────────────────────┐ │ │
+│  │  │  业务模块                   │ │ │
+│  │  │  face/ + rollcall/         │ │ │
+│  │  └─────────────────────────────┘ │ │
+│  │           ↓                       │ │
+│  │  ┌─────────────────────────────┐ │ │
+│  │  │  基础设施                   │ │ │
+│  │  │  DeepFace/TensorFlow       │ │ │
+│  │  └─────────────────────────────┘ │ │
+│  └───────────────────────────────────┘ │
 └─────────────────────────────────────────┘
 ```
 
-**设计原则**:
-- ✅ 核心库独立，不依赖任何 Agent
-- ✅ 适配层极薄，易于维护
-- ✅ 插件式扩展，动态加载
-- ✅ 符合 SOLID 原则
-
-详细架构: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+**设计原则**：
+- ✅ **Self-Contained**: 所有功能代码都在项目内
+- ✅ **Single Skill**: 对外是一个完整的 Skill，不是 Skill 框架
+- ✅ **Multi-Agent**: 提供不同 Agent 的适配入口
+- ✅ **No External Deps**: 不依赖任何外部项目
 
 ---
 
 ## 📁 项目结构
 
 ```
-facecall/
-├── README.md                    # 本文档
-├── LICENSE                      # MIT 许可证
-├── CHANGELOG.md                 # 版本历史
-├── CONTRIBUTING.md              # 贡献指南
+facecall/                            # 独立 Skill 包
+├── skill.yaml                       # Skill 元数据
+├── executor.py                      # Hermes 执行器（符号链接）
+├── tool.py                          # WorkBuddy 工具入口
+├── install.sh                       # 一键安装脚本 ⭐
 │
-├── src/facecall/               # 核心库
-│   ├── core/                   # 核心模块
-│   │   ├── plugin.py           # 插件协议
-│   │   ├── plugin_manager.py  # 插件管理器
-│   │   └── workflow.py         # 工作流
-│   ├── face/                   # 人脸识别
-│   ├── rollcall/               # 考勤提交
-│   └── config/                 # 配置管理
+├── src/facecall/                   # 核心库（完全自包含）
+│   ├── face/                       # 人脸识别模块 ✅
+│   │   ├── detector.py            # 人脸检测
+│   │   ├── matcher.py             # 人脸匹配
+│   │   ├── database.py            # 人脸数据库
+│   │   └── annotator.py           # 图片标注
+│   ├── rollcall/                   # 考勤提交模块 ✅
+│   │   ├── client.py              # API 客户端
+│   │   ├── crypto.py              # 加密工具
+│   │   └── rollcall_client.py     # 考勤客户端
+│   └── core/                       # 核心逻辑
+│       ├── plugin.py
+│       ├── plugin_manager.py
+│       └── workflow.py
 │
-├── skills/                     # Agent 适配器 ⭐
-│   ├── hermes/attend/          # Hermes Skill
-│   │   ├── install.sh          # 一键安装
-│   │   ├── requirements.txt
-│   │   └── README.md
-│   └── workbuddy/facecall/     # WorkBuddy Tool
-│       ├── install.sh
-│       ├── tool.py
-│       └── README.md
+├── hermes_integration/             # Hermes 集成
+│   └── skills/attend/
+│       ├── executor.py             # 实际执行器
+│       ├── config.yaml
+│       └── SKILL.md
 │
-├── hermes_integration/         # Hermes 原生集成
-│   ├── skills/attend/
-│   │   ├── executor.py         # Skill 执行器
-│   │   ├── config.yaml         # 配置文件
-│   │   └── SKILL.md            # 使用手册
-│   └── plugins/rollcall/
-│       └── plugin.py           # Plugin 实现
-│
-├── docs/                       # 文档
-│   ├── ARCHITECTURE.md         # 架构设计
-│   └── PLUGIN_DEVELOPMENT.md   # 插件开发
-│
-├── tests/                      # 测试
-├── config/                     # 配置模板
+├── config/                         # 配置模板
 │   ├── config.yaml
 │   └── classes.yaml
 │
-├── requirements.txt            # 生产依赖
-├── requirements-dev.txt        # 开发依赖
-└── pyproject.toml              # 项目配置
+├── docs/                           # 文档
+├── tests/                          # 测试
+├── requirements.txt
+├── pyproject.toml
+└── README.md
 ```
+
+**关键点**：
+- ✅ 所有功能代码都在 `src/facecall/` 内
+- ✅ 无任何外部项目依赖
+- ✅ 克隆即可运行
 
 ---
 

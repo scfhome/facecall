@@ -193,116 +193,127 @@ def run_facecall_check(params: dict[str, Any]) -> dict[str, Any]:
     Returns:
         dict: 识别结果
     """
-    import subprocess
-    import json
-    from pathlib import Path
-
-    # 读取配置获取项目根目录
-    config_path = Path(__file__).parent / "config.yaml"
-    if not config_path.exists():
-        return {
-            "success": False,
-            "error": "配置文件不存在"
-        }
-
-    import yaml
-    with open(config_path) as f:
-        config = yaml.safe_load(f)
-
-    project_root = Path(config["facecall"]["project_root"])
-    check_script = project_root / "classroom-face-attendance/scripts/check_attendance.py"
-
-    if not check_script.exists():
-        return {
-            "success": False,
-            "error": f"人脸识别脚本不存在: {check_script}"
-        }
-
-    # 解析 database 和 roster 路径
-    database = params.get("database")
-    if not database:
-        database = project_root / config["facecall"]["default_database"]
-    else:
-        database = Path(database)
-
-    roster = params.get("roster")
-    if not roster:
-        roster = project_root / config["facecall"]["default_roster"]
-    else:
-        roster = Path(roster)
-
-    # 检查文件存在性
-    if not database.exists():
-        return {
-            "success": False,
-            "error": f"人脸数据库不存在: {database}"
-        }
-
-    if not roster.exists():
-        return {
-            "success": False,
-            "error": f"班级名单不存在: {roster}"
-        }
-
-    # 准备输出路径
-    output_json = Path("/tmp") / f"attendance_{params['course']}_{params['date']}.json"
-    annotated_img = Path("/tmp") / f"annotated_{params['course']}_{params['date']}.jpg"
-
-    # 构建命令
-    cmd = [
-        "python3",
-        str(check_script),
-        "--photo", params["photo"],
-        "--database", str(database),
-        "--roster", str(roster),
-        "--threshold", str(params["threshold"]),
-        "--output", str(output_json),
-        "--annotated", str(annotated_img)
-    ]
-
-    logger.info(f"执行人脸识别: {' '.join(cmd)}")
-
     try:
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            timeout=120
+        from pathlib import Path
+        import yaml
+
+        # 导入 facecall 内部模块
+        from facecall.face.detector import FaceDetector
+        from facecall.face.matcher import FaceMatcher
+        from facecall.face.database import FaceDatabaseBuilder
+        from facecall.face.annotator import ImageAnnotator
+
+        # 读取配置
+        config_path = Path(__file__).parent / "config.yaml"
+        if not config_path.exists():
+            return {
+                "success": False,
+                "error": "配置文件不存在"
+            }
+
+        with open(config_path) as f:
+            config = yaml.safe_load(f)
+
+        project_root = Path(config["facecall"]["project_root"])
+
+        # 解析路径
+        database = params.get("database")
+        if not database:
+            database = project_root / config["facecall"]["default_database"]
+        else:
+            database = Path(database)
+
+        roster = params.get("roster")
+        if not roster:
+            roster = project_root / config["facecall"]["default_roster"]
+        else:
+            roster = Path(roster)
+
+        # 检查文件存在性
+        if not database.exists():
+            return {
+                "success": False,
+                "error": f"人脸数据库不存在: {database}"
+            }
+
+        if not roster.exists():
+            return {
+                "success": False,
+                "error": f"班级名单不存在: {roster}"
+            }
+
+        # 初始化组件
+        detector = FaceDetector()
+        matcher = FaceMatcher(threshold=params["threshold"])
+        db_builder = FaceDatabaseBuilder(database)
+        annotator = ImageAnnotator()
+
+        logger.info(f"开始人脸识别: {params['photo']}")
+
+        # 1. 加载数据库
+        face_db = db_builder.load_database()
+
+        # 2. 检测人脸
+        detected_faces = detector.detect_faces(params["photo"])
+        logger.info(f"检测到 {len(detected_faces)} 张人脸")
+
+        # 3. 匹配人脸
+        matches = matcher.match_faces(detected_faces, face_db)
+
+        # 4. 加载名单
+        with open(roster) as f:
+            import yaml
+            roster_data = yaml.safe_load(f)
+
+        # 5. 生成结果
+        students = []
+        present = []
+        uncertain = []
+
+        for match in matches:
+            student_info = {
+                "student_id": match.student_id,
+                "name": match.name,
+                "confidence": match.confidence,
+                "status": "present" if match.confidence > params["threshold"] else "uncertain"
+            }
+            students.append(student_info)
+
+            if match.confidence > params["threshold"]:
+                present.append(match.student_id)
+            else:
+                uncertain.append(match.student_id)
+
+        # 找出缺勤学生
+        all_students = set(roster_data.get("students", []))
+        present_set = set(present)
+        absent = list(all_students - present_set - set(uncertain))
+
+        # 6. 生成标注图片
+        output_dir = Path("/tmp")
+        annotated_img = output_dir / f"annotated_{params['course']}_{params['date']}.jpg"
+        annotator.annotate_image(
+            params["photo"],
+            matches,
+            str(annotated_img)
         )
-
-        if result.returncode != 0:
-            logger.error(f"识别失败: {result.stderr}")
-            return {
-                "success": False,
-                "error": result.stderr
-            }
-
-        # 读取结果
-        if not output_json.exists():
-            return {
-                "success": False,
-                "error": "识别脚本未生成输出文件"
-            }
-
-        with open(output_json) as f:
-            attendance_data = json.load(f)
 
         return {
             "success": True,
             "date": params["date"],
             "course": params["course"],
-            "summary": attendance_data.get("summary", {}),
-            "students": attendance_data.get("students", []),
+            "summary": {
+                "total": len(all_students),
+                "present": len(present),
+                "uncertain": len(uncertain),
+                "absent": len(absent)
+            },
+            "students": students,
             "annotated_image": str(annotated_img) if annotated_img.exists() else None
         }
 
-    except subprocess.TimeoutExpired:
-        return {
-            "success": False,
-            "error": "识别超时（120秒）"
-        }
     except Exception as e:
-        logger.exception("识别过程出错")
+        logger.exception("人脸识别过程出错")
         return {
             "success": False,
             "error": str(e)
