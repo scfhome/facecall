@@ -1,0 +1,32 @@
+# FaceCall 核心依赖
+
+# 人脸识别
+deepface>=0.0.87
+tensorflow>=2.15.0
+opencv-python>=4.9.0.80
+retina-face>=0.0.13
+pillow>=10.2.0
+
+# 数据处理
+pandas>=2.2.0
+numpy>=1.26.3
+openpyxl>=3.1.2
+
+# 配置管理
+pyyaml>=6.0.1
+python-dotenv>=1.0.1
+pydantic>=2.6.1
+
+# HTTP 请求
+requests>=2.31.0
+
+# 加密
+pycryptodome>=3.20.0
+
+# HTML 解析
+beautifulsoup4>=4.12.3
+lxml>=5.1.0
+
+# 终端 UI
+rich>=13.7.0
+click>=8.1.7

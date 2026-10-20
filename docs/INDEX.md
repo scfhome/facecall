@@ -15,6 +15,11 @@
 - [Hermes 快速开始](../hermes_integration/QUICKSTART.md) - 5分钟上手
 - [深度分析](../DEEP_INTEGRATION_ANALYSIS.md) - 技术架构深度分析
 
+### 🤖 AI Agent 集成
+- [架构总览](agent_integration/ARCHITECTURE.md) - 多 Agent 系统集成架构
+- [Hermes 快速开始](agent_integration/HERMES_QUICKSTART.md) - 一键安装 Hermes Skill
+- [WorkBuddy 设置](agent_integration/WORKBUDDY_SETUP.md) - WorkBuddy Tool 集成指南
+
 ---
 
 ## Hermes 集成
@@ -82,6 +87,9 @@ rollcall Plugin (提交)
 |------|------|---------|
 | [QUICKSTART](../hermes_integration/QUICKSTART.md) | 快速开始 | 所有用户 |
 | [SKILL.md](../hermes_integration/skills/attend/SKILL.md) | Skill 使用手册 | 终端用户 |
+| [Agent 架构](agent_integration/ARCHITECTURE.md) | 多 Agent 集成架构 | 架构师 |
+| [Hermes 一键安装](agent_integration/HERMES_QUICKSTART.md) | Hermes Skill 安装 | Hermes 用户 |
+| [WorkBuddy 集成](agent_integration/WORKBUDDY_SETUP.md) | WorkBuddy Tool 设置 | WorkBuddy 用户 |
 | [HERMES_INTEGRATION](HERMES_INTEGRATION.md) | 深度集成分析 | 开发者 |
 | [PLUGIN_DEVELOPMENT](PLUGIN_DEVELOPMENT.md) | 插件开发 | 开发者 |
 | [DEEP_ANALYSIS](../DEEP_INTEGRATION_ANALYSIS.md) | 架构深度分析 | 架构师 |
