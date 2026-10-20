@@ -244,26 +244,55 @@ def run_facecall_check(params: dict[str, Any]) -> dict[str, Any]:
 
         # 初始化组件
         detector = FaceDetector()
-        matcher = FaceMatcher(threshold=params["threshold"])
-        db_builder = FaceDatabaseBuilder(database)
-        annotator = ImageAnnotator()
+        db_builder = FaceDatabaseBuilder(detector=detector)
 
         logger.info(f"开始人脸识别: {params['photo']}")
 
         # 1. 加载数据库
-        face_db = db_builder.load_database()
+        face_db = db_builder.load(str(database))
+        logger.info(f"加载人脸数据库: {len(face_db)} 条记录")
 
-        # 2. 检测人脸
+        # 2. 初始化匹配器
+        matcher = FaceMatcher(database=face_db, threshold=params["threshold"])
+
+        # 3. 检测人脸
         detected_faces = detector.detect_faces(params["photo"])
         logger.info(f"检测到 {len(detected_faces)} 张人脸")
 
-        # 3. 匹配人脸
-        matches = matcher.match_faces(detected_faces, face_db)
+        # 4. 匹配人脸
+        matches = matcher.match_faces(detected_faces)
 
-        # 4. 加载名单
-        with open(roster) as f:
-            import yaml
-            roster_data = yaml.safe_load(f)
+        # 4. 加载名单（支持 .xlsx, .csv, .txt）
+        import pandas as pd
+        
+        roster_path = Path(roster)
+        all_students = set()  # 初始化
+        
+        if roster_path.suffix == ".xlsx":
+            df = pd.read_excel(roster)
+        elif roster_path.suffix == ".csv":
+            df = pd.read_csv(roster)
+        else:
+            # 假设是文本文件，每行一个学号
+            with open(roster) as f:
+                all_students_list = [line.strip() for line in f if line.strip()]
+            all_students = set(all_students_list)
+            df = None
+        
+        # 从 DataFrame 提取学号
+        if df is not None:
+            # 尝试找学号列（可能叫 "学号", "xh", "student_id" 等）
+            xh_col = None
+            for col in df.columns:
+                if col in ["学号", "xh", "student_id", "ID", "id"]:
+                    xh_col = col
+                    break
+            
+            if xh_col:
+                all_students = set(df[xh_col].astype(str).tolist())
+            else:
+                # 如果找不到明确的学号列，使用第一列
+                all_students = set(df.iloc[:, 0].astype(str).tolist())
 
         # 5. 生成结果
         students = []
@@ -272,27 +301,28 @@ def run_facecall_check(params: dict[str, Any]) -> dict[str, Any]:
 
         for match in matches:
             student_info = {
-                "student_id": match.student_id,
+                "xh": match.xh,
                 "name": match.name,
                 "confidence": match.confidence,
-                "status": "present" if match.confidence > params["threshold"] else "uncertain"
+                "status": "present" if match.is_certain else "uncertain"
             }
             students.append(student_info)
 
-            if match.confidence > params["threshold"]:
-                present.append(match.student_id)
-            else:
-                uncertain.append(match.student_id)
+            if match.is_certain and match.xh:
+                present.append(match.xh)
+            elif match.xh:
+                uncertain.append(match.xh)
 
         # 找出缺勤学生
-        all_students = set(roster_data.get("students", []))
         present_set = set(present)
         absent = list(all_students - present_set - set(uncertain))
 
         # 6. 生成标注图片
+        from facecall.face.annotator import ImageAnnotator
+        annotator = ImageAnnotator()
         output_dir = Path("/tmp")
         annotated_img = output_dir / f"annotated_{params['course']}_{params['date']}.jpg"
-        annotator.annotate_image(
+        annotator.annotate_matches(
             params["photo"],
             matches,
             str(annotated_img)

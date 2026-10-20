@@ -9,7 +9,8 @@ __version__ = "1.0.0"
 __author__ = "scfmac"
 __license__ = "MIT"
 
-from .database import FaceDatabaseBuilder, FaceRecord, DetectedFace
+from .models import FaceRecord, DetectedFace
+from .database import FaceDatabaseBuilder
 from .detector import FaceDetector
 from .matcher import FaceMatcher
 from .annotator import ImageAnnotator

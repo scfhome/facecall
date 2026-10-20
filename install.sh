@@ -61,15 +61,16 @@ info "检测安装目标..."
 
 INSTALL_TARGET=""
 
-# 检测 Hermes
+# 检测 Hermes（统一设置 HERMES_HOME）
 if [ -n "$HERMES_HOME" ] && [ -d "$HERMES_HOME" ]; then
     INSTALL_TARGET="hermes"
     HERMES_SKILLS_DIR="$HERMES_HOME/skills"
     info "检测到 Hermes Agent: $HERMES_HOME"
 elif [ -d "$HOME/.hermes" ]; then
     INSTALL_TARGET="hermes"
-    HERMES_SKILLS_DIR="$HOME/.hermes/skills"
-    info "检测到 Hermes Agent: $HOME/.hermes"
+    HERMES_HOME="$HOME/.hermes"  # 统一设置变量
+    HERMES_SKILLS_DIR="$HERMES_HOME/skills"
+    info "检测到 Hermes Agent: $HERMES_HOME"
 fi
 
 # 检测 WorkBuddy
@@ -101,29 +102,60 @@ echo ""
 info "安装目标: $INSTALL_TARGET"
 echo ""
 
+# 检测正确的 pip 路径
+if [ "$INSTALL_TARGET" = "hermes" ] || [ "$INSTALL_TARGET" = "both" ]; then
+    # 尝试多个可能的 Hermes venv 路径
+    HERMES_VENV_CANDIDATES=(
+        "$HERMES_HOME/hermes-agent/venv"
+        "$HERMES_HOME/.venv"
+        "$HERMES_HOME/venv"
+    )
+    
+    HERMES_PYTHON=""
+    for candidate in "${HERMES_VENV_CANDIDATES[@]}"; do
+        if [ -f "$candidate/bin/python" ]; then
+            HERMES_PYTHON="$candidate/bin/python"
+            HERMES_PIP="$candidate/bin/pip"
+            break
+        fi
+    done
+    
+    if [ -z "$HERMES_PYTHON" ]; then
+        warning "未找到 Hermes venv，将使用系统 Python"
+        PIP_CMD="pip3"
+    else
+        info "使用 Hermes Python: $HERMES_PYTHON"
+        PIP_CMD="$HERMES_PIP"
+    fi
+else
+    # 独立安装使用系统 pip
+    PIP_CMD="pip3"
+fi
+
 # 1. 安装 Python 依赖
 info "步骤 1/3: 安装 Python 依赖..."
-pip3 install -q -r requirements.txt
+$PIP_CMD install -q -r requirements.txt
 success "依赖安装完成"
 
 # 2. 安装 FaceCall 核心库
 info "步骤 2/3: 安装 FaceCall 核心库..."
-pip3 install -q -e .
+$PIP_CMD install -q -e .
 success "核心库安装完成"
 
 # 3. 安装到 Agent（如果检测到）
 if [ "$INSTALL_TARGET" = "hermes" ] || [ "$INSTALL_TARGET" = "both" ]; then
     info "步骤 3/3: 安装 Hermes Skill..."
 
-    mkdir -p "$HERMES_SKILLS_DIR/facecall"
+    # 修正：使用正确的 skill 名称 attend
+    mkdir -p "$HERMES_SKILLS_DIR/attend"
 
     # 复制必要文件
-    cp skill.yaml "$HERMES_SKILLS_DIR/facecall/"
-    cp hermes_integration/skills/attend/executor.py "$HERMES_SKILLS_DIR/facecall/"
-    cp -r config "$HERMES_SKILLS_DIR/facecall/"
+    cp SKILL.md "$HERMES_SKILLS_DIR/attend/"
+    cp hermes_integration/skills/attend/executor.py "$HERMES_SKILLS_DIR/attend/"
+    cp hermes_integration/skills/attend/config.yaml "$HERMES_SKILLS_DIR/attend/"
 
     success "Hermes Skill 安装完成"
-    success "安装路径: $HERMES_SKILLS_DIR/facecall"
+    success "安装路径: $HERMES_SKILLS_DIR/attend"
 fi
 
 if [ "$INSTALL_TARGET" = "workbuddy" ] || [ "$INSTALL_TARGET" = "both" ]; then
