@@ -91,6 +91,60 @@ faces = detector.detect_faces("photo.jpg")
 
 ---
 
+## 🔧 建库工具
+
+FaceCall 提供 3 个独立的建库工具脚本（位于 `scripts/`，安装后也会部署到 `~/.hermes/skills/attend/scripts/`）：
+
+### 1. 建立人脸数据库 (`build_database.py`)
+
+**单人照模式**：批量导入学生单人照
+```bash
+./scripts/build_database.py \
+  --mode single \
+  --roster data/roster.xlsx \
+  --photos-dir data/student_photos/ \
+  --single-mapping data/mapping.csv \
+  --output databases/class_a.pkl
+```
+
+**合照模式**：从班级合照中交互式匹配人脸
+```bash
+./scripts/build_database.py \
+  --mode group \
+  --roster data/roster.xlsx \
+  --photo data/group_photo.jpg \
+  --mapping data/face_mapping.csv \
+  --output databases/class_a.pkl
+```
+
+### 2. 独立考勤识别 (`check_attendance.py`)
+
+不通过 Hermes，直接运行考勤识别：
+```bash
+./scripts/check_attendance.py \
+  --photo classroom.jpg \
+  --database databases/class_a.pkl \
+  --roster data/roster.xlsx \
+  --output results.json \
+  --annotated annotated.jpg \
+  --course "体育3" \
+  --threshold 0.70
+```
+
+### 3. 一键集成正方系统 (`integrate_zfsoft.py`)
+
+人脸识别 + 自动提交到教务系统：
+```bash
+./scripts/integrate_zfsoft.py \
+  --photo classroom.jpg \
+  --database databases/class_a.pkl \
+  --roster data/roster.xlsx \
+  --course "体育3" \
+  --zfsoft-cli ~/zfsoft-rollcall-cli
+```
+
+---
+
 ## 📖 使用场景
 
 ### 场景 1: Telegram Bot 日常点名
