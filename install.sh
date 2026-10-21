@@ -153,9 +153,11 @@ if [ "$INSTALL_TARGET" = "hermes" ] || [ "$INSTALL_TARGET" = "both" ]; then
     cp SKILL.md "$HERMES_SKILLS_DIR/attend/"
     
     # 修正 executor.py 的 shebang 为 Hermes venv Python
+    # 用临时文件避免覆盖源文件
+    tmp_executor=$(mktemp)
     sed "1s|^#!/usr/bin/env python3|#!$HERMES_PYTHON|" \
-        hermes_integration/skills/attend/executor.py \
-        > "$HERMES_SKILLS_DIR/attend/executor.py"
+        hermes_integration/skills/attend/executor.py > "$tmp_executor"
+    mv "$tmp_executor" "$HERMES_SKILLS_DIR/attend/executor.py"
     chmod +x "$HERMES_SKILLS_DIR/attend/executor.py"
     
     cp hermes_integration/skills/attend/config.yaml "$HERMES_SKILLS_DIR/attend/"
@@ -163,9 +165,11 @@ if [ "$INSTALL_TARGET" = "hermes" ] || [ "$INSTALL_TARGET" = "both" ]; then
     # 复制建库工具脚本
     mkdir -p "$HERMES_SKILLS_DIR/attend/scripts"
     for script in scripts/*.py; do
-        sed "1s|^#!/usr/bin/env python3|#!$HERMES_PYTHON|" "$script" \
-            > "$HERMES_SKILLS_DIR/attend/$script"
-        chmod +x "$HERMES_SKILLS_DIR/attend/$script"
+        script_name=$(basename "$script")
+        tmp_script=$(mktemp)
+        sed "1s|^#!/usr/bin/env python3|#!$HERMES_PYTHON|" "$script" > "$tmp_script"
+        mv "$tmp_script" "$HERMES_SKILLS_DIR/attend/scripts/$script_name"
+        chmod +x "$HERMES_SKILLS_DIR/attend/scripts/$script_name"
     done
 
     success "Hermes Skill 安装完成"
