@@ -147,6 +147,15 @@ if [ "$INSTALL_TARGET" = "hermes" ] || [ "$INSTALL_TARGET" = "both" ]; then
     info "步骤 3/3: 安装 Hermes Skill..."
 
     # 修正：使用正确的 skill 名称 attend
+    # 确保父目录存在
+    mkdir -p "$HERMES_SKILLS_DIR"
+    
+    # 删除旧的符号链接或目录
+    if [ -e "$HERMES_SKILLS_DIR/attend" ] || [ -L "$HERMES_SKILLS_DIR/attend" ]; then
+        rm -rf "$HERMES_SKILLS_DIR/attend"
+    fi
+    
+    # 创建真实目录
     mkdir -p "$HERMES_SKILLS_DIR/attend"
 
     # 复制必要文件
